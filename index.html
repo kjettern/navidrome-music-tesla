@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -22,10 +22,11 @@
 html,body{height:100%;margin:0}
 html{overflow:hidden;overscroll-behavior:none}
 body{
-  /* iOS 的 100vh / height:100% 算的是「浏览器工具栏收起时」的高度，而地址栏和底栏
-     平时是展开的 —— 页面因此比可视区高一截，排在最后的播放条会被顶出屏幕，要滑
-     一下才看得到。按支持度递进：100% 兜底 → svh（按工具栏展开算，必定装得下）
-     → dvh（跟随工具栏伸缩，最贴合真实可视区）。 */
+  /* iOS 100vh / height:100% is calculated based on "collapsed browser toolbar",
+     but the address bar and bottom bar are usually expanded — making the page taller
+     than the visual area, pushing the bottom player bar off screen, requiring a swipe
+     to see it. Fallback progression: 100% -> svh (based on expanded toolbar, guaranteed to fit)
+     -> dvh (dynamic, best fit for true visual area). */
   height:100svh;
   height:100dvh;
   background:var(--bg);color:var(--fg);
@@ -36,7 +37,7 @@ body{
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
 
-/* ---------- 背景：封面大图高斯模糊，换歌时交叉淡入 ---------- */
+/* ---------- Background: Blurred large cover, cross-fade on song change ---------- */
 .bg-layer{position:fixed;inset:0;background-size:cover;background-position:center;
   filter:blur(90px) saturate(1.5);transform:scale(1.25);opacity:0;
   transition:opacity .6s ease;z-index:0;pointer-events:none}
@@ -47,7 +48,7 @@ button{cursor:pointer;border:0;background:none}
     rgba(0,0,0,var(--cover-shade-edge,0)) 100%);transition:background .6s ease}
 @media(max-width:720px){.bg-contrast{--contrast-x:50%}}
 
-/* ---------- 骨架 ---------- */
+/* ---------- Skeleton ---------- */
 .app{position:relative;z-index:2;display:flex;flex-direction:column;height:100%}
 .topbar{display:flex;align-items:center;justify-content:space-between;
   padding:10px 16px;gap:12px;flex:0 0 auto}
@@ -104,7 +105,7 @@ button{cursor:pointer;border:0;background:none}
 .badge.b-yt{color:#ff8a8a;border-color:rgba(255,138,138,.35)}
 .badge.b-ext{color:#c3a6ff;border-color:rgba(195,166,255,.35)}
 
-/* ---------- 歌词 ---------- */
+/* ---------- Lyrics ---------- */
 #lyrics{height:100%;width:100%;overflow-y:scroll;text-align:center;
   scrollbar-width:none;-ms-overflow-style:none;
   -webkit-mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent);
@@ -119,11 +120,11 @@ button{cursor:pointer;border:0;background:none}
 .ly-trans{font-size:13px;color:#93a3ab}
 .ly.on .ly-roma{font-size:26px;color:#fff}
 .ly.on .ly-trans{font-size:16px;color:#d6e4ea}
-/* 有罗马音时把字号层级倒过来：罗马音最大（跟着唱），原文缩小只作对照 */
+/* Invert font size hierarchy when Romaji is present: Romaji is largest (for singing along), original text shrunk for reference */
 .ly.has-roma .ly-main{font-size:13px;font-weight:400;color:#8c99a0;line-height:1.15}
 .ly.has-roma.on .ly-main{font-size:16px;color:#bcc8ce}
 
-/* 逐字扫光：当前行叠两层同字，上层亮色被 clip-path 从左往右揭开（GPU 合成，弱机友好） */
+/* Word-by-word sweeping light: Current line overlaps two layers of same text, top bright layer revealed by clip-path from left to right (GPU composited, low-end device friendly) */
 .ly.kk .kk-wrap{position:relative;display:inline-block;max-width:100%;
   white-space:normal;overflow-wrap:break-word}
 .ly.kk .kk-under{color:#8e9aa1}
@@ -133,8 +134,8 @@ button{cursor:pointer;border:0;background:none}
   will-change:clip-path;pointer-events:none}
 .lyrics-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   color:var(--dimmer);font-size:15px;pointer-events:none}
-/* 拖动歌词时的跳转准星。默认藏着，body.browsing 时才出现。
-   整条 pointer-events:none，只有按钮本身可点——不挡歌词的滚动。 */
+/* Seek crosshair when dragging lyrics. Hidden by default, appears when body.browsing.
+   Entire line is pointer-events:none, only the button itself is clickable — doesn't block lyric scrolling. */
 .seek-cue{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
   display:none;align-items:center;gap:10px;padding:0 10px;pointer-events:none;z-index:5}
 body.browsing .seek-cue{display:flex}
@@ -152,7 +153,7 @@ body.browsing .seek-cue{display:flex}
 .np-a{font-size:14px;color:var(--dim)}
 .np-n{font-size:13px;color:var(--dimmer);margin-top:6px}
 
-/* ---------- 底部播放条 ---------- */
+/* ---------- Bottom Player Bar ---------- */
 .player{flex:0 0 auto;display:flex;align-items:center;gap:18px;
   padding:14px 20px 18px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.35))}
 .controls{flex:0 0 auto;display:flex;align-items:center;gap:10px;white-space:nowrap}
@@ -170,14 +171,14 @@ body.browsing .seek-cue{display:flex}
 .bar .track{width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.16);overflow:hidden}
 .bar .fill{height:100%;width:0;background:var(--fg);border-radius:3px}
 
-/* ---------- 搜索 ---------- */
+/* ---------- Search ---------- */
 .searchwrap{position:relative;display:flex;align-items:center;gap:8px}
 #q{width:0;opacity:0;padding:0;border:1px solid var(--line);border-radius:20px;
   background:var(--card);height:40px;transition:width .25s,opacity .2s,padding .25s;min-width:0}
 .searchwrap.open #q{width:min(46vw,320px);opacity:1;padding:0 15px}
 #q::placeholder{color:var(--dimmer)}
 
-/* ---------- 弹窗 ---------- */
+/* ---------- Modal ---------- */
 .mask{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);
   z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
 .mask.open{display:flex}
@@ -220,14 +221,14 @@ body.browsing .seek-cue{display:flex}
 #testout.ok{color:#7fd6a2}
 #testout.err{color:#ff9b9b}
 
-/* ---------- 提示条 ---------- */
+/* ---------- Toast ---------- */
 #toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:60;
   background:rgba(20,24,28,.94);border:1px solid var(--line);border-radius:12px;
   padding:10px 16px;font-size:13.5px;max-width:80vw;text-align:center;
   opacity:0;transition:opacity .2s;pointer-events:none;white-space:pre-line}
 #toast.show{opacity:1}
 
-/* ---------- 窄屏 / 竖屏（小米平板、手机横竖屏都走这里）---------- */
+/* ---------- Narrow / Portrait screen (Xiaomi pad, phone portrait/landscape) ---------- */
 @media (max-width:960px){
   .main{gap:10px;padding:0 12px}
   .pane-list{flex-basis:42%}
@@ -235,9 +236,9 @@ body.browsing .seek-cue{display:flex}
   .player{padding:12px 14px 16px;gap:12px}
   .ctl{width:42px;height:42px}.ctl.play{width:50px;height:50px}
 }
-/* 手机（≤720px）：宽度不够并排两栏，改成歌词占满屏幕作为默认界面，
-   歌单收进底部浮层——收起时只露一条把手，点一下升起占大半屏高度，
-   在里面滑，选中一首自动缩回去，歌词重新露出来。 */
+/* Mobile (≤720px): Not enough width for two columns side by side, default to lyrics taking full screen,
+   playlist collapsed into bottom floating layer — when collapsed, only a handle shows, click to raise
+   to cover most of screen, swipe inside, selecting a song auto-collapses it, revealing lyrics again. */
 @media (max-width:720px){
   .main{position:relative;flex-direction:column;gap:0;padding:0;overflow:hidden}
   .pane-lyrics{flex:1 1 auto;width:100%;padding:0 10px}
@@ -254,9 +255,9 @@ body.browsing .seek-cue{display:flex}
   body.search-open .searchwrap.open #q{width:100%;min-width:0;flex:1}
   .topbar-right>.icon-btn,.searchwrap>.icon-btn{flex:0 0 40px}
 
-  /* 浮层用 absolute 而不是 fixed：.main 正好从顶栏下延伸到播放条上沿，
-     它的 overflow:hidden 会把收起时移下去的部分裁掉。用 fixed 会脱离这个
-     裁切，收起后列表会从播放条底下透出来。 */
+  /* Use absolute instead of fixed for the floating layer: .main extends perfectly from below topbar
+     to top of player bar, its overflow:hidden will crop the part moved down when collapsed.
+     Using fixed escapes this cropping, making the list peek out from under the player bar when collapsed. */
   .pane-list{
     position:absolute;left:0;right:0;bottom:0;
     flex:none;width:100%;max-width:none;height:72vh;height:72svh;height:72dvh;max-height:100%;
@@ -266,14 +267,14 @@ body.browsing .seek-cue{display:flex}
     background:rgba(16,18,22,.93);
     backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
     box-shadow:0 -12px 40px rgba(0,0,0,.5);
-    /* 留 1px 裁切余量，避免小数像素合成时露出把手下方的歌曲。 */
+    /* Leave 1px crop margin to avoid songs peeking under the handle due to sub-pixel rendering. */
     transform:translateY(calc(100% - var(--handle-h,44px) + 1px));
     transition:transform .3s cubic-bezier(.22,.61,.36,1);
     will-change:transform;
   }
   body.sheet-open .pane-list{transform:translateY(0)}
 
-  /* 列表标题栏兼作把手：收起时露出的就是它 */
+  /* List header also acts as a handle: this is what's visible when collapsed */
   .list-head{
     height:44px;align-items:center;justify-content:flex-start;gap:8px;
     padding:0 14px;position:relative;cursor:pointer;flex:0 0 auto;
@@ -285,12 +286,12 @@ body.browsing .seek-cue{display:flex}
     color:rgba(255,255,255,.55);transition:transform .3s ease}
   body.sheet-open .list-head::after{transform:rotate(180deg)}
 
-  /* 一行一首，尽量多塞：手机竖屏一屏能看十七八首 */
+  /* One song per row, pack as many as possible: mobile portrait can fit 17-18 songs */
   .songlist{padding:0 0 8px}
   .song{padding:5px 14px;border-radius:0;gap:9px}
   .song img{width:22px;height:22px;border-radius:3px}
-  /* 歌名和歌手同行；放不下的可以左右滑着看。右边缘 mask 淡出——文字短时淡出落在
-     空白上看不出来，只有真超出才显现，等于自带"还有更多"的提示。 */
+  /* Title and artist on the same line; swipe horizontally if they don't fit. Right edge mask fades out —
+     short text fades into blank space unnoticeably, only appears if overflowing, serving as a "more" hint. */
   .song .meta{display:flex;align-items:baseline;gap:7px;white-space:nowrap;
     overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
     -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent);
@@ -300,7 +301,7 @@ body.browsing .seek-cue{display:flex}
   .song .a{font-size:12px;flex:0 0 auto;overflow:visible;text-overflow:clip}
   .badge{font-size:10px;padding:1px 4px}
 }
-/* 横向空间很紧时（车机分屏等）把歌词让出去 */
+/* Hide lyrics when horizontal space is very tight (e.g. car split screen) */
 @media (max-height:420px){
   .topbar{padding:6px 14px}
   .ly{font-size:17px}.ly.on{font-size:20px}
@@ -320,7 +321,7 @@ body.browsing .seek-cue{display:flex}
     <div class="brand"><span class="dot"></span><span>Navidrome</span></div>
     <div class="topbar-right">
       <div id="mobileActions"></div>
-      <button class="icon-btn" id="btnSettings" title="设置" aria-label="设置">
+      <button class="icon-btn" id="btnSettings" title="Settings" aria-label="Settings">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 8.9 19a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 5 8.9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
     </div>
@@ -328,31 +329,31 @@ body.browsing .seek-cue{display:flex}
 
   <div class="main">
     <div class="pane-list">
-      <div class="list-head" id="listHead"><b id="listTitle">曲库</b><span id="listCount"></span></div>
-      <div class="list-tools" id="bedTools" hidden><button id="btnCandidates">从曲库挑选</button><span id="bedHint">长按歌曲收藏或解除收藏</span></div>
+      <div class="list-head" id="listHead"><b id="listTitle">Library</b><span id="listCount"></span></div>
+      <div class="list-tools" id="bedTools" hidden><button id="btnCandidates">Pick from Library</button><span id="bedHint">Long press song to favorite or unfavorite</span></div>
       <div class="songlist" id="songlist"></div>
-      <div class="library-actions" id="libraryActions" role="toolbar" aria-label="点歌与曲库操作">
-        <button class="icon-btn" id="btnVoice" title="语音点歌 · 可选" aria-label="语音点歌" aria-pressed="false">
+      <div class="library-actions" id="libraryActions" role="toolbar" aria-label="Song request and library actions">
+        <button class="icon-btn" id="btnVoice" title="Voice Request · Optional" aria-label="Voice Request" aria-pressed="false">
           <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg>
         </button>
-        <button class="icon-btn" id="btnShuffle" title="常听与发现 / 最近添加" aria-label="切换曲库排序">
+        <button class="icon-btn" id="btnShuffle" title="Frequent & Discover / Recently Added" aria-label="Toggle Library Sort">
           <svg viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
         </button>
         <div class="searchwrap" id="searchwrap">
-          <input id="q" type="search" placeholder="搜索歌曲 / 歌手…" autocomplete="off" enterkeyhint="search">
-          <button class="icon-btn" id="btnSearch" title="搜索" aria-label="搜索">
+          <input id="q" type="search" placeholder="Search songs / artists..." autocomplete="off" enterkeyhint="search">
+          <button class="icon-btn" id="btnSearch" title="Search" aria-label="Search">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
           </button>
         </div>
-        <button class="icon-btn" id="btnBedtime" title="最爱" aria-label="最爱" aria-pressed="false">
+        <button class="icon-btn" id="btnBedtime" title="Favorites" aria-label="Favorites" aria-pressed="false">
           <svg viewBox="0 0 24 24"><path d="M12 21l-8.5-8.2A5.5 5.5 0 0 1 12 5a5.5 5.5 0 0 1 8.5 7.8z"/></svg>
         </button>
       </div>
     </div>
     <div class="pane-lyrics" id="lyricsPane">
       <div id="lyrics"></div>
-      <div class="lyrics-empty" id="lyricsEmpty">选一首歌开始</div>
-      <!-- 手动拖歌词时出现：中间一条准星线 + 目标时间。点按钮才真的跳，避免误触。 -->
+      <div class="lyrics-empty" id="lyricsEmpty">Select a song to start</div>
+      <!-- Appears when dragging lyrics manually: a center crosshair + target time. Click button to seek, avoiding misclicks. -->
       <div class="seek-cue" id="seekCue">
         <span class="seek-line"></span>
         <button class="seek-btn" id="seekBtn">
@@ -365,13 +366,13 @@ body.browsing .seek-cue{display:flex}
 
   <div class="player">
     <div class="controls">
-      <button class="ctl" id="btnPrev" aria-label="上一首"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14l-11-7z"/></svg></button>
-      <button class="ctl play" id="btnPlay" aria-label="播放或暂停"><svg id="icPlay" viewBox="0 0 24 24"><path d="M7 4l14 8-14 8z"/></svg></button>
-      <button class="ctl" id="btnNext" aria-label="下一首"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5l11 7-11 7z"/></svg></button>
+      <button class="ctl" id="btnPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14l-11-7z"/></svg></button>
+      <button class="ctl play" id="btnPlay" aria-label="Play or Pause"><svg id="icPlay" viewBox="0 0 24 24"><path d="M7 4l14 8-14 8z"/></svg></button>
+      <button class="ctl" id="btnNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5l11 7-11 7z"/></svg></button>
     </div>
     <div class="pinfo">
       <div class="row">
-        <div class="name" id="npName">还没有开始播放</div>
+        <div class="name" id="npName">Not playing yet</div>
         <div class="time"><span id="tCur">0:00</span> / <span id="tTot">0:00</span></div>
       </div>
       <div class="bar" id="bar"><div class="track"><div class="fill" id="fill"></div></div></div>
@@ -385,102 +386,102 @@ body.browsing .seek-cue{display:flex}
   <div class="sheet song-menu" role="dialog" aria-modal="true" aria-labelledby="songMenuTitle">
     <h2 id="songMenuTitle"></h2>
     <div class="sub" id="songMenuArtist"></div>
-    <button class="menu-action" id="songDelete" disabled>删除原始文件 · 本页面不支持</button>
-    <button class="menu-action" id="songFavorite">加入最爱</button>
-    <button class="menu-action" id="songUnfavorite">取消最爱</button>
-    <p class="menu-note" id="songMenuNote">删除原始文件需要到音乐库所在设备操作。解除收藏会保留音频文件。</p>
+    <button class="menu-action" id="songDelete" disabled>Delete original file · Not supported here</button>
+    <button class="menu-action" id="songFavorite">Add to Favorites</button>
+    <button class="menu-action" id="songUnfavorite">Remove from Favorites</button>
+    <p class="menu-note" id="songMenuNote">Deleting the original file requires operating on the device hosting the music library. Removing from favorites keeps the audio file.</p>
     <div class="menu-status" id="songMenuStatus" role="status" aria-live="polite"></div>
-    <div class="actions"><button class="btn" id="songMenuClose">关闭</button></div>
+    <div class="actions"><button class="btn" id="songMenuClose">Close</button></div>
   </div>
 </div>
 
 <div class="mask" id="mask">
   <div class="sheet">
-    <h2>设置</h2>
-    <div class="sub">设置保存在这台设备的浏览器里，仅用于连接你配置的服务。</div>
+    <h2>Settings</h2>
+    <div class="sub">Settings are saved in this device's browser, used only to connect to your configured services.</div>
 
     <div class="group">
-      <h3>Navidrome 服务器</h3>
-      <p class="hint">填你自己的 Navidrome 地址和登录账号。地址填到域名或 IP 就行，
-        <code>/rest</code> 会自动补上。<br>
-        手头还没有服务器？<button type="button" class="linklike" id="btnDemo">填入官方示例库</button>——
-        Navidrome 官方的公开演示服务器，几百首免费音乐，可以直接试。</p>
+      <h3>Navidrome Server</h3>
+      <p class="hint">Enter your own Navidrome address and login account. Address up to domain or IP is fine,
+        <code>/rest</code> will be auto-appended.<br>
+        No server yet? <button type="button" class="linklike" id="btnDemo">Load official demo library</button> —
+        Navidrome's official public demo server, hundreds of free songs to try.</p>
       <div class="field">
-        <label>服务器地址</label>
+        <label>Server Address</label>
         <input id="cfgUrl" type="url" placeholder="https://music.example.com" spellcheck="false">
       </div>
       <div class="two">
-        <div class="field"><label>用户名</label><input id="cfgUser" type="text" autocomplete="username" spellcheck="false"></div>
-        <div class="field"><label>密码</label><input id="cfgPass" type="password" autocomplete="current-password"></div>
+        <div class="field"><label>Username</label><input id="cfgUser" type="text" autocomplete="username" spellcheck="false"></div>
+        <div class="field"><label>Password</label><input id="cfgPass" type="password" autocomplete="current-password"></div>
       </div>
     </div>
 
     <div class="group">
-      <h3>最爱</h3>
-      <p class="hint">与 Navidrome 和其他客户端里的歌曲心形收藏同步。无需创建歌单。
-        只收藏歌曲会加入这里；收藏专辑或歌手不会自动收藏其中的歌曲。</p>
-      <div class="field"><label>入口显示名称（只改文字，例如“哄睡最爱”）</label>
-        <input id="cfgBedName" type="text" placeholder="最爱" spellcheck="false"></div>
+      <h3>Favorites</h3>
+      <p class="hint">Syncs with heart favorites in Navidrome and other clients. No playlist creation needed.
+        Favoriting songs will add them here; favoriting albums or artists will not automatically favorite their songs.</p>
+      <div class="field"><label>Entry display name (changes text only, e.g. "Sleep Favorites")</label>
+        <input id="cfgBedName" type="text" placeholder="Favorites" spellcheck="false"></div>
     </div>
 
     <div class="group">
-      <h3>YouTube 搜索 <span class="badge">可选</span></h3>
+      <h3>YouTube Search <span class="badge">Optional</span></h3>
       <p class="hint">
-        填了 key 才会在搜索结果里带上 YouTube，库里没有的歌也能直接放。
-        去 RapidAPI 上搜这两个 API 订阅一下（都有免费档），用同一个 key：
-        <b>yt-api</b>（搜索）和 <b>youtube-mp36</b>（取音频）。
-        免费档有速率上限，key 可以填多个，用逗号隔开，会随机轮着用。
-        详细步骤和排错见项目 README。
+        YouTube will only be included in search results if the key is filled, allowing you to play songs not in your library.
+        Search RapidAPI for these two APIs and subscribe (both have free tiers), using the same key:
+        <b>yt-api</b> (search) and <b>youtube-mp36</b> (audio extraction).
+        The free tier has rate limits, you can enter multiple keys separated by commas, they will be used randomly.
+        See project README for detailed steps and troubleshooting.
       </p>
-      <div class="field"><label>RapidAPI Key（可填多个，逗号分隔）</label>
-        <input id="cfgYt" type="password" placeholder="留空 = 不启用" spellcheck="false"></div>
+      <div class="field"><label>RapidAPI Key (multiple allowed, comma separated)</label>
+        <input id="cfgYt" type="password" placeholder="Leave blank = Disable" spellcheck="false"></div>
     </div>
 
     <div class="group">
-      <h3>AI 搜索纠错 <span class="badge">可选</span></h3>
+      <h3>AI Search Correction <span class="badge">Optional</span></h3>
       <p class="hint">
-        语音或手输容易出同音字（“告白气球” 听成 “告白汽球”）。填了 key 之后，
-        搜索会先让模型把词顺一遍，原词和纠正词的结果都会列出来。
-        任何兼容 OpenAI <code>/chat/completions</code> 的服务都可以。不填就完全不启用。
+        Voice or manual input easily produces homophones. After filling in the key,
+        search will first let the model smooth out the words; results for both original and corrected words will be listed.
+        Any service compatible with OpenAI <code>/chat/completions</code> can be used. Leave blank to completely disable.
       </p>
-      <label class="switch"><input id="cfgAiOn" type="checkbox"><span>启用 AI 纠错</span></label>
-      <div class="field"><label>接口地址</label>
+      <label class="switch"><input id="cfgAiOn" type="checkbox"><span>Enable AI Correction</span></label>
+      <div class="field"><label>API Address</label>
         <input id="cfgAiUrl" type="url" placeholder="https://api.openai.com/v1" spellcheck="false"></div>
       <div class="two">
         <div class="field"><label>API Key</label><input id="cfgAiKey" type="password" spellcheck="false"></div>
-        <div class="field"><label>模型</label><input id="cfgAiModel" type="text" placeholder="gpt-4o-mini" spellcheck="false"></div>
+        <div class="field"><label>Model</label><input id="cfgAiModel" type="text" placeholder="gpt-4o-mini" spellcheck="false"></div>
       </div>
     </div>
 
     <div class="group">
-      <h3>自建搜索后端 <span class="badge">可选 · 进阶</span></h3>
+      <h3>Self-hosted Search Backend <span class="badge">Optional · Advanced</span></h3>
       <p class="hint">
-        如果你自己跑了一个搜索/取流的小服务，把地址填这儿就能接进来，
-        接口约定见仓库里的 <code>docs/backend-api.md</code>。不填就没有这一栏。
+        If you run a small self-hosted search/streaming service, fill in the address here to connect it.
+        Interface specifications are in <code>docs/backend-api.md</code> in the repository. Leave blank to remove this section.
       </p>
-      <div class="field"><label>后端地址</label>
-        <input id="cfgExt" type="url" placeholder="留空 = 不启用" spellcheck="false"></div>
+      <div class="field"><label>Backend Address</label>
+        <input id="cfgExt" type="url" placeholder="Leave blank = Disable" spellcheck="false"></div>
     </div>
 
     <div class="group" id="voiceSettings">
-      <h3>语音点歌与 iOS 快捷指令 <span class="badge">可选</span></h3>
-      <p class="hint">普通播放不需要此服务。部署仓库里的 <code>server/voice.py</code>，
-        就能接收 iOS 快捷指令的听写文字；配置服务端转写接口后也能使用网页麦克风。
-        音乐账号仍只发给 Navidrome，转写 API Key 只放在服务端。
-        部署与快捷指令步骤见 <code>docs/voice.zh-CN.md</code>。</p>
-      <label class="switch"><input id="cfgVoiceOn" type="checkbox"><span>启用语音服务与远程点歌</span></label>
-      <div class="field"><label>语音服务地址</label>
+      <h3>Voice Request & iOS Shortcuts <span class="badge">Optional</span></h3>
+      <p class="hint">Normal playback does not require this service. Deploy <code>server/voice.py</code> from the repository,
+        to receive dictation text from iOS Shortcuts; web microphone can also be used after configuring the server transcription API.
+        Music account is still only sent to Navidrome, transcription API Key stays on the server.
+        See <code>docs/voice.zh-CN.md</code> for deployment and Shortcuts steps.</p>
+      <label class="switch"><input id="cfgVoiceOn" type="checkbox"><span>Enable voice service & remote request</span></label>
+      <div class="field"><label>Voice Service Address</label>
         <input id="cfgVoiceUrl" type="url" placeholder="https://voice.example.com" spellcheck="false"></div>
-      <div class="field"><label>设备令牌（与该设备的快捷指令使用同一个）</label>
-        <input id="cfgVoiceToken" type="password" autocomplete="off" placeholder="留空 = 不启用" spellcheck="false"></div>
-      <button class="btn" id="btnVoiceTest">测试语音服务</button><span id="voiceTestOut" class="hint" role="status"></span>
+      <div class="field"><label>Device Token (use same as device's shortcut)</label>
+        <input id="cfgVoiceToken" type="password" autocomplete="off" placeholder="Leave blank = Disable" spellcheck="false"></div>
+      <button class="btn" id="btnVoiceTest">Test Voice Service</button><span id="voiceTestOut" class="hint" role="status"></span>
     </div>
 
     <div class="actions">
       <span id="testout"></span>
-      <button class="btn ghost" id="btnTest">测试连接</button>
-      <button class="btn" id="btnCancel">取消</button>
-      <button class="btn primary" id="btnSave">保存</button>
+      <button class="btn ghost" id="btnTest">Test Connection</button>
+      <button class="btn" id="btnCancel">Cancel</button>
+      <button class="btn primary" id="btnSave">Save</button>
     </div>
   </div>
 </div>
@@ -584,7 +585,7 @@ function normalize(songs) {
   return (Array.isArray(songs) ? songs : []).filter(s => {
     if (!s || s.id == null || !String(s.id) || seen.has(String(s.id))) return false;
     seen.add(String(s.id)); return true;
-  }).map(s => ({ src:'lib', id:String(s.id), title:String(s.title || '(无标题)'),
+  }).map(s => ({ src:'lib', id:String(s.id), title:String(s.title || '(Untitled)'),
     artist:String(s.artist || ''), album:String(s.album || ''), duration:Number(s.duration) || 0,
     coverArt:s.coverArt, created:s.created, playCount:Math.max(0, Number(s.playCount) || 0),
     played:s.played || null, genre:String(s.genre || ''), tags:[] }));
@@ -681,7 +682,7 @@ root.MusicLibrary = {normalize, recommend, candidates, playedSeconds, PlaylistCa
 
 /* ============================================================
    Navidrome Music · Tesla
-   一个单文件的 Navidrome 前端。基础播放直连音乐库，语音服务可选。
+   A single-file Navidrome frontend. Basic playback connects directly to music library, voice service is optional.
    ============================================================ */
 
 const $ = id => document.getElementById(id);
@@ -705,8 +706,8 @@ function toast(msg, ms) {
 }
 
 /* ---------- MD5 ----------
-   Subsonic 的认证是 t = md5(密码 + 每次随机的 salt)，所以必须在本地算 md5。
-   为了保持“单文件、零依赖”，这里放一份标准实现，别引 CDN。 */
+   Subsonic auth is t = md5(password + random salt), so we must calculate md5 locally.
+   To keep this "single file, zero dependencies", here is a standard implementation, no CDN needed. */
 function md5(input) {
   function rl(n, c) { return (n << c) | (n >>> (32 - c)); }
   function add(a, b) { const l = (a & 0xFFFF) + (b & 0xFFFF); return (((a >> 16) + (b >> 16) + (l >> 16)) << 16) | (l & 0xFFFF); }
@@ -716,7 +717,7 @@ function md5(input) {
   function hh(a,b,c,d,x,s,t){ return cmn(b ^ c ^ d, a, b, x, s, t); }
   function ii(a,b,c,d,x,s,t){ return cmn(c ^ (b | ~d), a, b, x, s, t); }
 
-  // 先转 UTF-8 字节，否则中文密码算出来的 md5 是错的
+  // Convert to UTF-8 bytes first, otherwise md5 of Chinese passwords will be wrong
   const bytes = [];
   for (const ch of unescape(encodeURIComponent(String(input)))) bytes.push(ch.charCodeAt(0));
 
@@ -759,16 +760,16 @@ function md5(input) {
   }).join('');
 }
 
-/* ---------- 配置：只存在本机 localStorage ---------- */
+/* ---------- Config: Exists only in local localStorage ---------- */
 const CFG_KEY = 'navidrome-tesla.config.v1';
-const DEFAULTS = { url:'', user:'', pass:'', yt:'', aiOn:false, aiUrl:'', aiKey:'', aiModel:'', ext:'', favoriteName:'最爱',
+const DEFAULTS = { url:'', user:'', pass:'', yt:'', aiOn:false, aiUrl:'', aiKey:'', aiModel:'', ext:'', favoriteName:'Favorites',
                    voiceOn:false, voiceUrl:'', voiceToken:'' };
 let cfg = Object.assign({}, DEFAULTS);
 try { Object.assign(cfg, JSON.parse(localStorage.getItem(CFG_KEY) || '{}')); } catch (e) {}
-const saveCfg = () => { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) { toast('浏览器不让保存设置（可能是隐私模式）'); } };
+const saveCfg = () => { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) { toast('Browser prevents saving settings (maybe in private mode)'); } };
 const configured = () => !!(cfg.url && cfg.user && cfg.pass);
 
-/* ---------- Subsonic 客户端 ---------- */
+/* ---------- Subsonic Client ---------- */
 const CLIENT = 'navidrome-tesla';
 function restBase(config = cfg) {
   let u = (config.url || '').trim().replace(/\/+$/, '');
@@ -776,7 +777,7 @@ function restBase(config = cfg) {
   return u.replace(/\/rest$/i, '') + '/rest';
 }
 function auth(config = cfg) {
-  // salt 每次请求都换一个，密码本身不出现在 URL 里
+  // salt changes per request, password itself is not in the URL
   const salt = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, '0')).join('');
   return 'u=' + enc(config.user) + '&t=' + md5(config.pass + salt) + '&s=' + salt +
          '&v=1.16.1&c=' + CLIENT + '&f=json';
@@ -792,25 +793,25 @@ async function subGet(path, extra, config = cfg, method = 'GET') {
     const r = await fetch(method === 'POST' ? restBase(config) + '/' + path : sub(path, extra, config), options);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const body = (await r.json())['subsonic-response'];
-    if (!body) throw new Error('返回格式不对，确认地址是 Navidrome 吗？');
-    if (body.status !== 'ok') throw new Error((body.error && body.error.message) || '请求被拒绝');
+    if (!body) throw new Error('Incorrect return format, are you sure the address is Navidrome?');
+    if (body.status !== 'ok') throw new Error((body.error && body.error.message) || 'Request denied');
     return body;
   } catch (e) {
-    if (e.name === 'AbortError') throw new Error('请求超时，结果尚未确认');
+    if (e.name === 'AbortError') throw new Error('Request timeout, result unconfirmed');
     throw e;
   } finally { clearTimeout(timer); }
 }
 const subPost = (path, params, config = cfg) => subGet(path, new URLSearchParams(params).toString(), config, 'POST');
 
-/* ---------- 播放状态 ---------- */
+/* ---------- Playback State ---------- */
 const audio = new Audio();
 audio.preload = 'none';
-let list = [];              // 当前列表（统一结构）
-let library = [];           // 缓存的整库
+let list = [];              // Current list (unified structure)
+let library = [];           // Cached entire library
 let libLoaded = false;
-let idx = -1;               // 当前播放下标
-let recentOrder = false;    // 默认常听与发现，按钮切换到最近添加
-let seq = 0;                // 搜索序号，防止慢响应覆盖新结果
+let idx = -1;               // Current playback index
+let recentOrder = false;    // Default frequent & discover, button toggles to recently added
+let seq = 0;                // Search sequence, prevents slow response from overwriting new results
 let generation = 0, playSeq = 0, playingItem = null, listenSession = null;
 let playback = null, playAttempt = 0;
 let view = 'library', libraryLoading = null;
@@ -823,8 +824,8 @@ const MusicLibrary = window.MusicLibrary;
 const cur = () => playingItem;
 const keyOf = it => it ? (it.src || '') + '|' + (it.id || it.videoId || '') : '';
 
-/* 所有来源最终都落到同一个 <audio>：本地是 Subsonic 的 stream，
-   YouTube 和自建后端各自解析出直链。没有第二套播放器。 */
+/* All sources ultimately fall to the same <audio>: local is Subsonic's stream,
+   YouTube and self-hosted backend parse their own direct links. No secondary player. */
 const P = {
   get time() { return audio.currentTime; },
   get dur()  {
@@ -842,7 +843,7 @@ function togglePlayback() {
   (pending ? playback.wantPlay : !P.paused) ? P.pause() : P.play();
 }
 
-/* ---------- 背景：封面高斯模糊，两层交叉淡入 ---------- */
+/* ---------- Background: large cover Gaussian blur, crossfade when changing songs ---------- */
 let bgFront = 'bgA';
 const setBackground = MusicBackground.createUpdater((image, analysis, url) => {
   // The existing gradient is about 57% black at the centre of the lyrics pane.
@@ -856,11 +857,11 @@ const setBackground = MusicBackground.createUpdater((image, analysis, url) => {
   bgFront = back;
 });
 
-/* ---------- 曲库 ---------- */
+/* ---------- Library ---------- */
 function fromSubsonic(s) {
   return bedtime.tag(MusicLibrary.normalize([s])[0]);
 }
-/* 没有封面时的占位图。用内联 SVG 而不是外链图片，保持整个文件零外部依赖。 */
+/* Placeholder image when there is no cover. Use inline SVG instead of external image to keep file zero external dependency. */
 const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
   '<rect width="64" height="64" fill="#20262b"/>' +
@@ -872,10 +873,10 @@ function coverOf(it, size) {
   return it.cover || '';
 }
 
-/* 封面按需加载。
-   这一步不是锦上添花：曲库列表动辄几百行，一次把封面全请求出去会把连接占满，
-   点歌之后音频流要排队十几秒才出声（实测点完歌 12 秒才响）。所以只给真正
-   滚到眼前的行发请求，缩略图也只要 96px。 */
+/* Load covers on demand.
+   This is not just icing on the cake: the library list can have hundreds of rows, requesting all covers at once
+   will clog connections, and audio streams will queue for over ten seconds after requesting a song (measured 12 seconds).
+   So only request rows scrolled into view, and only 96px thumbnails. */
 const coverIO = ('IntersectionObserver' in window) ? new IntersectionObserver((es, o) => {
   es.forEach(e => {
     if (!e.isIntersecting) return;
@@ -883,9 +884,9 @@ const coverIO = ('IntersectionObserver' in window) ? new IntersectionObserver((e
     o.unobserve(img);
     if (!url) return;
     delete img.dataset.src;
-    // 先探测再替换：直接把 url 塞进 <img> 的话，服务端慢或挂了就一直是个空白块
-    // （公开 demo 的 getCoverArt 就出现过整个卡死、curl 40 秒无响应）。
-    // 探测成功才换掉占位图，失败或永远不回就一直显示占位图。
+    // Probe first then replace: if we plug url directly into <img>, it will be a blank block if server is slow or down
+    // (the public demo's getCoverArt has frozen entirely, curl 40s no response).
+    // Only replace placeholder upon success, keep placeholder on failure or timeout.
     const probe = new Image();
     probe.onload = () => { img.src = url; };
     probe.src = url;
@@ -904,13 +905,13 @@ async function loadLibrary(force) {
           if (gen !== generation) return;
           const batch = (b.searchResult3 && b.searchResult3.song) || [];
           const fresh = batch.filter(s => !seen.has(String(s.id)));
-          if (batch.length && !fresh.length) throw new Error('服务器没有正确返回曲库分页');
+          if (batch.length && !fresh.length) throw new Error('Server did not return library pagination correctly');
           fresh.forEach(s => { seen.add(String(s.id)); songs.push(s); });
           if (batch.length < 500) break;
         }
         library = MusicLibrary.normalize(songs).map(s => bedtime.tag(s));
         libLoaded = true; bedtime.updateStats(library);
-        if (!library.length) toast('连上了，但曲库是空的');
+        if (!library.length) toast('Connected, but library is empty');
       })();
       libraryLoading = job;
       job.finally(() => { if (libraryLoading === job) libraryLoading = null; }).catch(() => {});
@@ -919,7 +920,7 @@ async function loadLibrary(force) {
     if (gen === generation && my === seq) applyOrder();
   } catch (e) {
     if (gen !== generation) return;
-    toast('连不上 Navidrome：\n' + e.message);
+    toast('Cannot connect to Navidrome:\n' + e.message);
     openSettings();
   }
 }
@@ -927,13 +928,13 @@ function applyOrder() {
   view = 'library';
   const lib = recentOrder ? library.slice().sort((a, b) => new Date(b.created || 0) - new Date(a.created || 0))
     : MusicLibrary.recommend(library, discoveryPriorities);
-  $('btnShuffle').title = recentOrder ? '最近添加 · 点击切回常听与发现' : '常听与发现 · 点击按最近添加排序';
-  setList(lib, '曲库');
+  $('btnShuffle').title = recentOrder ? 'Recently Added · Click to switch back to Frequent & Discover' : 'Frequent & Discover · Click to sort by Recently Added';
+  setList(lib, 'Library');
 }
 
-/* ---------- 最爱：账号隔离的本地快照，唯一来源是 Navidrome 歌曲 star ---------- */
+/* ---------- Favorites: Account isolated local snapshot, only source is Navidrome song star ---------- */
 // The legacy bedtime function/DOM names are internal; display text never selects a playlist.
-function bedtimeName(config = cfg) { return (config.favoriteName || '').trim() || '最爱'; }
+function bedtimeName(config = cfg) { return (config.favoriteName || '').trim() || 'Favorites'; }
 function setupBedtime() {
   const key = 'navidrome-tesla.favorites.v1:' + md5(restBase() + '\n' + cfg.user);
   const cache = new MusicLibrary.PlaylistCache(key, () => { if (bedtime === cache) syncBedtimeTags(); });
@@ -970,9 +971,9 @@ function showBedtime() {
   if (isMobile()) document.body.classList.add('sheet-open');
 }
 function showCandidates() {
-  if (!libLoaded) { toast('曲库仍在加载，稍后再试'); return; }
+  if (!libLoaded) { toast('Library is still loading, try again later'); return; }
   ++seq; view = 'candidates';
-  setList(MusicLibrary.recommend(MusicLibrary.candidates(library), discoveryPriorities), '哄睡候选');
+  setList(MusicLibrary.recommend(MusicLibrary.candidates(library), discoveryPriorities), 'Sleep Candidates');
   if (isMobile()) document.body.classList.add('sheet-open');
 }
 setInterval(refreshBedtime, 300000);
@@ -980,26 +981,26 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden && bedtime && Date.now() - bedtime.lastSync > 60000) refreshBedtime();
 });
 
-/* ---------- 列表渲染 ---------- */
-const BADGE = { lib:'<span class="badge b-lib">库</span>', yt:'<span class="badge b-yt">YT</span>', ext:'<span class="badge b-ext">外部</span>' };
+/* ---------- List Rendering ---------- */
+const BADGE = { lib:'<span class="badge b-lib">Lib</span>', yt:'<span class="badge b-yt">YT</span>', ext:'<span class="badge b-ext">Ext</span>' };
 function setList(items, title) {
   list = items; idx = list.findIndex(it => keyOf(it) === keyOf(cur()));
-  $('listTitle').textContent = title || '曲库';
+  $('listTitle').textContent = title || 'Library';
   $('bedTools').hidden = view !== 'bedtime' && view !== 'candidates';
-  $('bedHint').textContent = view === 'candidates' ? '按歌名与专辑筛选，请试听后长按收藏' : '长按歌曲收藏或解除收藏';
+  $('bedHint').textContent = view === 'candidates' ? 'Filter by title and album, please preview before long pressing to favorite' : 'Long press song to favorite or unfavorite';
   $('btnBedtime').classList.toggle('active', view === 'bedtime' || view === 'candidates');
   $('btnBedtime').setAttribute('aria-pressed', String(view === 'bedtime' || view === 'candidates'));
   render();
 }
 function render() {
-  $('listCount').textContent = list.length ? list.length + ' 首' : '';
+  $('listCount').textContent = list.length ? list.length + ' Songs' : '';
   const box = $('songlist');
-  // 旧行的 img 还被 observer 攥着，不断开的话反复搜索会越积越多
+  // Old row's img is still held by observer, if not disconnected repeated searches will accumulate
   if (coverIO) coverIO.disconnect();
   if (!list.length) {
     box.innerHTML = '<div class="list-empty">' + (view === 'bedtime'
-      ? '暂无最爱。长按曲库歌曲加入最爱，或在 Navidrome 给歌曲点心形。首次使用会在后台同步。'
-      : view === 'candidates' ? '没有匹配的候选。可以在曲库中试听，再长按收藏。' : '暂无歌曲') + '</div>';
+      ? 'No favorites yet. Long press a song in the library to add, or heart it in Navidrome. Syncs in background on first use.'
+      : view === 'candidates' ? 'No matching candidates. You can preview in library, then long press to favorite.' : 'No songs') + '</div>';
     return;
   }
   const frag = document.createDocumentFragment();
@@ -1013,10 +1014,10 @@ function render() {
       '<img alt="" decoding="async">' +
       '<div class="meta"><div class="t">' + esc(it.title) + (BADGE[it.src] || '') + '</div>' +
       '<div class="a">' + esc(it.artist) + '</div></div>' +
-      '<span class="favorite" aria-label="Navidrome 最爱歌曲"' + (it.src === 'lib' && bedtime.has(it.id) ? '' : ' hidden') + '>♥</span>';
+      '<span class="favorite" aria-label="Navidrome Favorite Song"' + (it.src === 'lib' && bedtime.has(it.id) ? '' : ' hidden') + '>♥</span>';
     const cov = coverOf(it);
     const img = li.firstChild;
-    img.src = PLACEHOLDER;                    // 先占位，真封面到了再换
+    img.src = PLACEHOLDER;                   // Placeholder first, replace when true cover arrives
     if (cov) {
       if (coverIO) { img.dataset.src = cov; coverIO.observe(img); }
       else { const probe = new Image(); probe.onload = () => { img.src = cov; }; probe.src = cov; }
@@ -1024,7 +1025,7 @@ function render() {
     li.addEventListener('click', () => {
       if (Date.now() < suppressClickUntil || menuItem) return;
       play(i);
-      if (isMobile()) document.body.classList.remove('sheet-open');   // 选好了就缩回去露出歌词
+      if (isMobile()) document.body.classList.remove('sheet-open');   // Hide when selected to reveal lyrics
     });
     li.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); li.click(); }
@@ -1036,14 +1037,14 @@ function render() {
   box.appendChild(frag);
 }
 
-/* ---------- 长按 / 右键菜单：原生 star/unstar，解除收藏保留原文件和普通歌单 ---------- */
+/* ---------- Long press / Right click menu: native star/unstar, unfavoriting keeps original file and playlist ---------- */
 function syncSongMenu() {
   const local = menuItem && menuItem.src === 'lib', favorite = local && bedtime.has(menuItem.id);
   $('songFavorite').disabled = menuBusy || !local || favorite;
   $('songUnfavorite').disabled = menuBusy || !local || !favorite;
   $('songMenuClose').disabled = menuBusy;
-  if (!menuBusy) $('songMenuStatus').textContent = !local ? '先将歌曲导入自己的 Navidrome 曲库后再收藏'
-    : favorite ? '已收藏到 ' + bedtimeName() : '尚未收藏到 ' + bedtimeName();
+  if (!menuBusy) $('songMenuStatus').textContent = !local ? 'Import the song to your own Navidrome library before favoriting'
+    : favorite ? 'Added to ' + bedtimeName() : 'Not yet added to ' + bedtimeName();
 }
 function openSongMenu(it, opener) {
   menuItem = it; menuOpener = opener; menuBusy = false;
@@ -1060,21 +1061,21 @@ function closeSongMenu() {
 async function setBedtimeFavorite(favorite) {
   if (menuBusy || !menuItem || menuItem.src !== 'lib') return;
   const it = menuItem, cache = bedtime, config = Object.assign({}, cfg), gen = generation;
-  const check = () => { if (gen !== generation || cache !== bedtime) throw new Error('连接设置已改变，请重试'); };
-  menuBusy = true; syncSongMenu(); $('songMenuStatus').textContent = '正在同步…';
+  const check = () => { if (gen !== generation || cache !== bedtime) throw new Error('Connection settings changed, please try again'); };
+  menuBusy = true; syncSongMenu(); $('songMenuStatus').textContent = 'Syncing...';
   try {
     await subPost(favorite ? 'star' : 'unstar', [['id', it.id]], config); check();
     const data = await subGet('getSong', 'id=' + enc(it.id), config); check();
-    if (!data.song || !!data.song.starred !== favorite) throw new Error('收藏状态尚未确认，请稍后再试');
+    if (!data.song || !!data.song.starred !== favorite) throw new Error('Favorite status unconfirmed, please try again later');
     const entries = cache.songs.filter(s => s.id !== it.id);
     if (favorite) entries.push(Object.assign({}, it, data.song));
     ++cache.revision;
     cache.replace(entries, 'starred');
     menuBusy = false; closeSongMenu();
-    toast(favorite ? '已收藏到 ' + bedtimeName() : '已解除收藏，音频文件保留');
+    toast(favorite ? 'Added to ' + bedtimeName() : 'Removed from favorites, audio file kept');
     refreshBedtime();
   } catch (e) {
-    menuBusy = false; syncSongMenu(); $('songMenuStatus').textContent = '未确认成功：' + e.message;
+    menuBusy = false; syncSongMenu(); $('songMenuStatus').textContent = 'Unconfirmed success: ' + e.message;
     refreshBedtime();
   }
 }
@@ -1131,21 +1132,21 @@ function markPlaying() {
   }
 }
 
-/* ---------- 取流地址 ---------- */
+/* ---------- Fetch stream address ---------- */
 function streamUrl(it, config = cfg) {
   if (it.src === 'lib') return sub('stream', 'id=' + enc(it.id) + '&format=raw', config);
   if (it.src === 'yt')  return ytStream(it.videoId, undefined, config);
   if (it.src === 'ext') {
     return fetch((config.ext || '').trim().replace(/\/+$/, '') + '/play?' + new URLSearchParams(it.play || { id: it.id }))
       .then(r => r.json()).then(r => {
-        if (!r || !r.url) throw new Error('外部后端没返回播放地址');
+        if (!r || !r.url) throw new Error('External backend returned no playback address');
         return r.url;
       });
   }
-  throw new Error('这个来源不用解析流地址');
+  throw new Error('This source does not require stream address parsing');
 }
 
-/* ---------- 播放 ---------- */
+/* ---------- Playback ---------- */
 function currentPlayback(state) {
   return state === playback && state.seq === playSeq && state.gen === generation;
 }
@@ -1161,8 +1162,8 @@ function playbackFailed(state, error) {
   state.wantPlay = false;
   audio.pause(); setPlayIcon(false);
   toast(error && error.name === 'NotAllowedError'
-    ? '浏览器需要确认播放，请点下方播放按钮。'
-    : '音频无法播放，请重试或换一首。', 6000);
+    ? 'Browser requires playback confirmation, please click the play button below.'
+    : 'Audio cannot be played, please try again or change song.', 6000);
 }
 function requestPlayback(state) {
   if (!currentPlayback(state) || !state.src || state.src !== audio.src) return;
@@ -1211,7 +1212,7 @@ function resumePlayback() {
     return;
   }
   state.wantPlay = true;
-  if (state.pending) { setPlayIcon(true); toast('正在取音频，请稍候…'); return; }
+  if (state.pending) { setPlayIcon(true); toast('Fetching audio, please wait...'); return; }
   if (!state.src || audio.error) { state.fallback = false; resolvePlayback(state); }
   else requestPlayback(state);
 }
@@ -1231,12 +1232,12 @@ function play(i) {
   setBackground(coverOf(it, 600));
   loadLyrics(it, my);
 
-  // YouTube 要先换一个直链，慢的时候得让用户知道在干嘛
-  if (it.src === 'yt') toast('正在取 YouTube 音频…', 8000);
+  // YouTube needs to fetch a direct link first, if slow we should let the user know what's happening
+  if (it.src === 'yt') toast('Fetching YouTube audio...', 8000);
   resolvePlayback(state);
 }
 function setPlayIcon(playing) {
-  $('btnPlay').setAttribute('aria-label', playing ? '暂停' : '播放');
+  $('btnPlay').setAttribute('aria-label', playing ? 'Pause' : 'Play');
   $('icPlay').innerHTML = playing
     ? '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>'
     : '<path d="M7 4l14 8-14 8z"/>';
@@ -1271,14 +1272,14 @@ audio.addEventListener('ended', () => next());
 function next() { if (list.length) play((idx + 1) % list.length); }
 function prev() { if (list.length) play(((idx < 0 ? list.length : idx) - 1 + list.length) % list.length); }
 
-/* ---------- 歌词 ---------- */
+/* ---------- Lyrics ---------- */
 let lyrics = [], lineIdx = -1;
 const NO_LYRIC = [{ start: 1e9, value: '' }];
 
 function showLyricPlaceholder(text) {
   $('lyrics').innerHTML = '';
   const e = $('lyricsEmpty'), it = cur();
-  // 没歌词的歌不少（尤其 YouTube），右边空一片太难看，就把封面放大顶上
+  // Many songs lack lyrics (especially YouTube), an empty right side looks bad, so enlarge cover to fill
   if (it) {
     e.innerHTML = '<div class="np-art"><img alt="">' +
       '<div class="np-t">' + esc(it.title) + '</div>' +
@@ -1295,15 +1296,15 @@ function showLyricPlaceholder(text) {
 }
 async function loadLyrics(it, my) {
   lyrics = []; lineIdx = -1; kkState = null; kkPrev = -1;
-  endBrowse();                      // 换歌了，退出手动浏览态
-  showLyricPlaceholder('歌词加载中…');
+  endBrowse();                      // Changed song, exit manual browse mode
+  showLyricPlaceholder('Loading lyrics...');
   try {
     let lines = [];
     if (it.src === 'lib') {
       const b = await subGet('getLyricsBySongId', 'id=' + enc(it.id));
       const sl = b.lyricsList && b.lyricsList.structuredLyrics;
       if (sl && sl.length) {
-        // 同一时间戳的多行（常见于双语歌词）合成一行，避免叠在一起
+        // Merge multiple lines at same timestamp (common in bilingual lyrics) into one to prevent overlapping
         lines = sl[0].line.reduce((acc, c) => {
           const hit = acc.find(x => x.start === c.start);
           if (hit) hit.value += '\n' + c.value; else acc.push({ start: c.start, value: c.value });
@@ -1315,20 +1316,20 @@ async function loadLyrics(it, my) {
       lines = (r && r.lines) || [];
     }
     if (my !== playSeq) return;
-    if (!lines.length) { showLyricPlaceholder('这首没有歌词'); lyrics = NO_LYRIC; return; }
+    if (!lines.length) { showLyricPlaceholder('This song has no lyrics'); lyrics = NO_LYRIC; return; }
     lyrics = lines;
     paintLyrics();
   } catch (e) {
     if (my !== playSeq) return;
-    showLyricPlaceholder('这首没有歌词');
+    showLyricPlaceholder('This song has no lyrics');
     lyrics = NO_LYRIC;
   }
 }
 function paintLyrics() {
   $('lyricsEmpty').style.display = 'none';
-  // 每行拆三层：原文 .ly-main / 罗马音 .ly-roma / 翻译 .ly-trans。
-  // 拆开的原因：扫光要整个替换某一层的 innerHTML，分层后不会把别的副行冲掉；
-  // 有罗马音时 CSS 还会用 .has-roma 把字号层级倒过来（罗马音最大）。
+  // Split each line into three layers: Original .ly-main / Romaji .ly-roma / Translation .ly-trans.
+  // Reason for splitting: Sweeping light replaces innerHTML of a specific layer, separation prevents overwriting sub-lines;
+  // When Romaji is present, CSS uses .has-roma to invert font size hierarchy (Romaji is largest).
   let html = '<div class="pad"></div>';
   lyrics.forEach((l, i) => {
     html += '<div class="ly' + (l.roma ? ' has-roma' : '') + '" id="ly' + i + '">' +
@@ -1350,7 +1351,7 @@ function syncLyrics(ms) {
     const el = $('ly' + i);
     if (el) {
       el.classList.add('on');
-      // 用户正在手动拖歌词时别抢滚动条，否则手一松就被拉回当前行
+      // Don't fight for scrollbar when user is dragging lyrics manually, otherwise they snap back on release
       if (!browsing) {
         const box = $('lyrics');
         box.scrollTo({ top: el.offsetTop - (box.clientHeight / 2 - el.offsetHeight / 2), behavior: 'smooth' });
@@ -1362,10 +1363,10 @@ function syncLyrics(ms) {
   kkTick();
 }
 
-/* ---------- 拖歌词跳转 ----------
-   拖动歌词时暂停自动跟随，在正中间显示一条准星线和目标时间。
-   不直接跳——手指滑过去就跳太容易误触，必须点一下那个按钮才 seek。
-   松手几秒不动就自动恢复跟随，不用手动退出。 */
+/* ---------- Drag lyrics to seek ----------
+   Pause auto-tracking when dragging lyrics, show a center crosshair line and target time.
+   Don't seek directly — swiping past would cause accidental jumps, must click that button to seek.
+   Auto-resume tracking if untouched for a few seconds, no manual exit required. */
 let browsing = false, browseTimer = null, seekTarget = -1;
 
 function lyricNearestCenter() {
@@ -1406,20 +1407,20 @@ $('lyrics').addEventListener('scroll', () => {
     $('seekTime').textContent = fmtTime((lyrics[i].start || 0) / 1000);
     document.body.classList.add('browsing');
   }
-  armBrowseTimeout();     // 惯性滚动期间不断续期，停下来才开始倒计时
+  armBrowseTimeout();     // Keep renewing during inertial scroll, countdown starts when stopped
 }, { passive: true });
 $('seekBtn').addEventListener('click', e => {
-  e.stopPropagation();    // 别触发歌词区那个"收起浮层"的点击
+  e.stopPropagation();    // Don't trigger the "collapse floating layer" click in lyrics area
   if (seekTarget >= 0 && lyrics[seekTarget]) {
     P.seek((lyrics[seekTarget].start || 0) / 1000);
-    lineIdx = -1;         // 强制重新定位当前行（跳到同一行时也要重新居中）
+    lineIdx = -1;         // Force re-position current line (needs re-centering even if jumping to same line)
   }
   endBrowse();
 });
 
-/* ---------- 逐字扫光 ----------
-   只给"当前行"铺两层同字：底层暗 .kk-under + 上层亮 .kk-over，每帧只改 .kk-over 一个
-   clip-path（不触发重排，GPU 合成，弱机也扛得住）。没有逐字时间的歌自动退回整行高亮。 */
+/* ---------- Word-by-word sweeping light ----------
+   Only lay two layers of same text on "current line": bottom dark .kk-under + top bright .kk-over, only modify .kk-over
+   clip-path each frame (does not trigger reflow, GPU composited, low-end device friendly). Songs without word-by-word timing automatically fall back to full line highlight. */
 let kkState = null, kkRAF = null, kkPrev = -1;
 function kkPlain(i) {
   const el = $('ly' + i), l = lyrics[i];
@@ -1435,7 +1436,7 @@ function kkSetLine(i) {
   kkPrev = -1; kkState = null;
   const l = lyrics[i], el = $('ly' + i);
   if (!el || !l) return;
-  // 有罗马音时扫光跑在罗马音那层——它才是最大的主视觉行
+  // Run sweeping light on Romaji layer when present — it is the main visual line
   const useRoma = !!(l.romaChars && l.romaChars.length);
   const chars = useRoma ? l.romaChars : l.chars;
   if (!chars || !chars.length) return;
@@ -1448,7 +1449,7 @@ function kkSetLine(i) {
 
   const wrap = tgt.querySelector('.kk-wrap'), over = tgt.querySelector('.kk-over');
   const wr = wrap.getBoundingClientRect();
-  // 一次性量好每个字的左右边界和所在行，之后每帧只写不读，避免反复重排
+  // Measure left/right bounds and line for each char once, then only write each frame to avoid repeated reflows
   const cl = [], cr = [], ct = [];
   tgt.querySelectorAll('.kk-under .kc').forEach(s => {
     const r = s.getBoundingClientRect();
@@ -1492,8 +1493,8 @@ function kkTick() {
   if (s.nRows === 1) {
     cp = 'inset(0 ' + (s.rowR[0] - x).toFixed(1) + 'px 0 0)';
   } else {
-    // 折行时：已唱完的行给整行宽、当前行给到 x。歌词居中，每行左边界不同，
-    // 所以逐行取 rowL/rowR，描成一个阶梯多边形（右边自上而下、左边自下而上闭合）。
+    // Wrapping lines: sung lines get full width, current line gets up to x. Lyrics centered, each line left bound differs,
+    // so get rowL/rowR per line, trace a stepped polygon (right side top-down, left side bottom-up closed).
     const p = [];
     for (let k = 0; k <= r; k++) {
       const w = (k < r) ? s.rowR[k] : x;
@@ -1514,7 +1515,7 @@ function kkLoop() {
   kkRAF = (!P.paused && kkState) ? requestAnimationFrame(kkLoop) : null;
 }
 
-/* ---------- 搜索：本地 + 可选插件 ---------- */
+/* ---------- Search: Local + Optional Plugins ---------- */
 const extBase = (config = cfg) => (config.ext || '').trim().replace(/\/+$/, '');
 
 async function searchLocal(q, config = cfg) {
@@ -1522,22 +1523,22 @@ async function searchLocal(q, config = cfg) {
   return ((b.searchResult3 && b.searchResult3.song) || []).map(fromSubsonic);
 }
 
-/* ---------- YouTube（RapidAPI，浏览器直连）----------
-   两个接口都带 CORS，预检也放行 x-rapidapi-key，所以不需要任何中转层。
-   搜索走 yt-api，取流走 youtube-mp36 换一个 mp3 直链，直接塞进 <audio>，
-   不嵌播放器。key 可以填多个（逗号或换行分隔），每次随机挑一个——
-   免费档有硬性速率上限，多备几个能少撞墙。 */
+/* ---------- YouTube (RapidAPI, direct browser connect) ----------
+   Both APIs include CORS, preflight allows x-rapidapi-key, so no proxy layer needed.
+   Search goes to yt-api, fetch stream goes to youtube-mp36 for direct mp3 link, feed right into <audio>,
+   no embedded player. Keys can be multiple (comma/newline separated), random pick each time —
+   free tiers have hard rate limits, more keys mean fewer walls. */
 const ytKeys = (config = cfg) => (config.yt || '').split(/[\s,]+/).filter(Boolean);
 
 async function rapid(host, path, config = cfg) {
   const keys = ytKeys(config);
-  if (!keys.length) throw new Error('还没填 RapidAPI key');
+  if (!keys.length) throw new Error('RapidAPI key not filled yet');
   const key = keys[Math.floor(Math.random() * keys.length)];
   const r = await fetch('https://' + host + path, {
     headers: { 'x-rapidapi-host': host, 'x-rapidapi-key': key },
   });
   const d = await r.json().catch(() => null);
-  if (!r.ok) throw new Error('RapidAPI ' + r.status + (d && d.message ? '：' + String(d.message).slice(0, 60) : ''));
+  if (!r.ok) throw new Error('RapidAPI ' + r.status + (d && d.message ? ': ' + String(d.message).slice(0, 60) : ''));
   return d || {};
 }
 
@@ -1557,20 +1558,20 @@ async function searchYouTube(q, config = cfg) {
   }));
 }
 
-/* 换直链。这个接口按需转码，第一次点某首歌可能先返回 processing，等几秒再问一次。 */
+/* Fetch direct link. This API transcodes on demand, first click on a song may return processing, ask again in few seconds. */
 async function ytStream(videoId, tries, config = cfg) {
   tries = tries || 4;
   for (let i = 0; i < tries; i++) {
     const d = await rapid('youtube-mp36.p.rapidapi.com', '/dl?id=' + enc(videoId), config);
     if (d.status === 'ok' && d.link) return d.link;
-    if (d.status !== 'processing') throw new Error('YouTube：' + (d.msg || d.status || '取流失败'));
-    toast('YouTube 正在转码，再等等…', 4000);
+    if (d.status !== 'processing') throw new Error('YouTube: ' + (d.msg || d.status || 'Failed to fetch stream'));
+    toast('YouTube is transcoding, wait a bit...', 4000);
     await new Promise(r => setTimeout(r, 3000));
   }
-  throw new Error('YouTube 转码太久了，换一条试试');
+  throw new Error('YouTube transcoding took too long, try another');
 }
 
-/* 自建后端（可选）。约定见 docs/backend-api.md。 */
+/* Self-hosted backend (Optional). Specs in docs/backend-api.md. */
 async function searchExt(q, config = cfg) {
   if (!extBase(config)) return [];
   const d = await fetch(extBase(config) + '/search?q=' + enc(q)).then(r => r.json());
@@ -1580,18 +1581,18 @@ async function searchExt(q, config = cfg) {
   }));
 }
 
-/* 搜索纠错（可选）。两条路，优先走第一条：
-   ① 自建后端的 /correct —— key 留在服务端，不用暴露在浏览器里，还能做缓存
-   ② 直连任何兼容 OpenAI /chat/completions 的服务
-   后端没实现 /correct（404/超时/形状不对）就自动落到第二条。 */
+/* AI Search Correction (Optional). Two paths, prefer first:
+   ① Self-hosted backend /correct — key stays on server, no browser exposure, cache possible
+   ② Direct connect to any OpenAI /chat/completions compatible service
+   If backend hasn't implemented /correct (404/timeout/wrong shape) it falls to second path. */
 async function aiCorrect(q, config = cfg) {
   if (extBase(config)) {
     try {
       const d = await fetch(extBase(config) + '/correct?q=' + enc(q)).then(r => r.json());
       const t = (d && d.corrected || '').trim();
       if (d && d.changed && t && t !== q && t.length <= 40) return t;
-      if (d && typeof d.changed === 'boolean') return null;   // 后端明确说"不用改"，就别再问模型
-    } catch (e) { /* 没这个端点，继续往下走 */ }
+      if (d && typeof d.changed === 'boolean') return null;   // Backend explicitly said "no need to change", so don't ask model
+    } catch (e) { /* Endpoint doesn't exist, continue down */ }
   }
   if (!(config.aiOn && config.aiUrl && config.aiKey && config.aiModel)) return null;
   const url = config.aiUrl.trim().replace(/\/+$/, '').replace(/\/chat\/completions$/, '') + '/chat/completions';
@@ -1601,7 +1602,7 @@ async function aiCorrect(q, config = cfg) {
     body: JSON.stringify({
       model: config.aiModel, temperature: 0, max_tokens: 40,
       messages: [
-        { role: 'system', content: '你是音乐搜索纠错器。用户给一段可能有同音字或错别字的歌名/歌手名，你只输出最可能的正确写法，不解释、不加引号标点。本来就对就原样输出。' },
+        { role: 'system', content: 'You are a music search corrector. The user provides a song/artist name that might have homophones or typos, you only output the most likely correct spelling, without explanation, quotes, or punctuation. If it is already correct, output as is.' },
         { role: 'user', content: q },
       ],
     }),
@@ -1620,14 +1621,14 @@ async function doSearch(raw, startFirst = false) {
   const config = Object.assign({}, cfg);
   let intent = playAttempt;
   view = 'search';
-  setList(acc, '搜索「' + q0 + '」');
+  setList(acc, 'Search "' + q0 + '"');
   const push = rows => {
     if (my !== seq || !rows || !rows.length) return;
     let added = false;
     rows.forEach(r => { if (!acc.some(x => keyOf(x) === keyOf(r))) { acc.push(r); added = true; } });
     if (added) {
       list = acc; idx = list.findIndex(it => keyOf(it) === keyOf(cur())); render(); markPlaying();
-      if (isMobile()) document.body.classList.add('sheet-open');      // 出结果就升起来给用户挑
+      if (isMobile()) document.body.classList.add('sheet-open');      // Pop up for user to choose on results
     }
   };
   let started = false;
@@ -1637,35 +1638,35 @@ async function doSearch(raw, startFirst = false) {
     }
   };
 
-  // ① 本地先出——库里有的话马上就能响，不用等网络插件
+  // ① Local returns first — if in library, plays immediately, no need to wait for network plugins
   try { push(await searchLocal(q0, config)); autoplay(); }
-  catch (e) { if (my === seq) toast('本地搜索失败：' + e.message); }
+  catch (e) { if (my === seq) toast('Local search failed: ' + e.message); }
   if (my !== seq) return;
 
-  // ② AI 纠错（开了才走）。改了词就两个词都搜，结果都留着，不替换
+  // ② AI Correction (only if enabled). If changed, search both terms, keep both results, don't replace
   const terms = [q0];
   try {
     const q1 = await aiCorrect(q0, config);
     if (my !== seq) return;
     if (q1 && my === seq) {
       terms.push(q1);
-      toast('AI 纠正：' + q0 + ' → ' + q1);
+      toast('AI Correction: ' + q0 + ' → ' + q1);
       push(await searchLocal(q1, config)); autoplay();
     }
-  } catch (e) { /* 纠错挂了不影响搜索本身 */ }
+  } catch (e) { /* Correction failure shouldn't affect search itself */ }
   if (my !== seq) return;
 
-  // ③ 插件并行，各自失败互不影响
+  // ③ Plugins in parallel, independent failure handling
   const jobs = [];
   terms.forEach(t => {
     if (ytKeys(config).length) jobs.push(searchYouTube(t, config).then(push).catch(e => { if (my === seq) toast(e.message); }));
     if (extBase(config)) jobs.push(searchExt(t, config).then(push).catch(() => {}));
   });
   await Promise.all(jobs);
-  if (my === seq) { autoplay(); if (!acc.length) toast('没找到「' + q0 + '」'); }
+  if (my === seq) { autoplay(); if (!acc.length) toast('Not found "' + q0 + '"'); }
 }
 
-/* ---------- 进度 / 歌词推进 ---------- */
+/* ---------- Progress / Lyrics Advance ---------- */
 setInterval(() => {
   const d = P.dur, t = P.time;
   $('tCur').textContent = fmtTime(t);
@@ -1675,17 +1676,18 @@ setInterval(() => {
   if (!P.paused && !kkRAF && kkState) kkLoop();
 }, 200);
 
-/* ---------- 手机版歌单浮层 ----------
-   手机屏放不下并排两栏，所以歌词占满作为默认界面，歌单收在底部只露一条把手。
-   把手就是列表标题栏本身，点一下升起/收起；选中一首自动收起。 */
+/* ---------- Mobile Playlist Floating Layer ----------
+   Mobile screens can't fit two side-by-side columns, so lyrics take full screen as default UI,
+   playlist tucked at the bottom showing only a handle.
+   The handle is the list header itself, click to expand/collapse; auto collapses upon selecting a song. */
 function isMobile() { return window.matchMedia('(max-width:720px)').matches; }
 function syncSheetMetrics() {
-  // 收起时靠 transform 下移、只留把手，位移量取决于把手实际高度（字号/机型会影响）
+  // Collapsing relies on transform translateY, leaving only handle visible, distance depends on actual handle height (fonts/devices affect this)
   const h = Math.round($('listHead').getBoundingClientRect().height);
   if (h) document.documentElement.style.setProperty('--handle-h', h + 'px');
 }
-// 把手：点一下开合；也支持手指上滑拉出来、下滑推回去。
-// 拖动时关掉 transition 让浮层贴着手指走，松手再打开做吸附动画。
+// Handle: Click to toggle; also supports swipe up to pull out, swipe down to push back.
+// Disable transition while dragging so layer follows finger, re-enable on release for snap animation.
 (function bindSheetDrag() {
   const handle = $('listHead'), sheet = document.querySelector('.pane-list');
   let startY = 0, startT = 0, delta = 0, dragging = false, wasOpen = false, moved = false;
@@ -1702,7 +1704,7 @@ function syncSheetMetrics() {
 
   handle.addEventListener('touchmove', e => {
     if (!dragging || !e.touches.length) return;
-    delta = e.touches[0].clientY - startY;              // 上滑为负
+    delta = e.touches[0].clientY - startY;              // Negative is swiping up
     if (Math.abs(delta) > 6) moved = true;
     const range = travel();
     sheet.style.transform = 'translateY(' + Math.min(range, Math.max(0, (wasOpen ? 0 : range) + delta)) + 'px)';
@@ -1712,8 +1714,8 @@ function syncSheetMetrics() {
     if (!dragging) return;
     dragging = false;
     sheet.style.transition = '';
-    sheet.style.transform = '';                          // 交回给 CSS 类做吸附
-    const v = delta / Math.max(1, Date.now() - startT);   // px/ms，快速一甩也算数
+    sheet.style.transform = '';                          // Hand back to CSS classes for snap
+    const v = delta / Math.max(1, Date.now() - startT);   // px/ms, fast flick counts too
     const decided = Math.abs(delta) > travel() * 0.25 || Math.abs(v) > 0.5;
     document.body.classList.toggle('sheet-open', decided ? delta < 0 : wasOpen);
   };
@@ -1721,18 +1723,18 @@ function syncSheetMetrics() {
   handle.addEventListener('touchcancel', finish, { passive: true });
 
   handle.addEventListener('click', () => {
-    if (moved) { moved = false; return; }                // 刚才是拖动，别再 toggle 一次
+    if (moved) { moved = false; return; }                // That was a drag, don't toggle again
     document.body.classList.toggle('sheet-open');
   });
 })();
-// 浮层开着时点歌词区域，也当作"要看歌词"，收回去
+// When floating layer is open, clicking lyrics area acts as "want to see lyrics", collapse it
 $('lyricsPane').addEventListener('click', () => {
   if (isMobile()) document.body.classList.remove('sheet-open');
 });
 window.addEventListener('resize', () => {
   syncToolbar();
   syncSheetMetrics();
-  if (!isMobile()) document.body.classList.remove('sheet-open');   // 回到宽屏就别留状态
+  if (!isMobile()) document.body.classList.remove('sheet-open');   // Remove state if going back to wide screen
 });
 function syncToolbar() {
   const target = isMobile() ? $('mobileActions') : document.querySelector('.pane-list');
@@ -1740,9 +1742,9 @@ function syncToolbar() {
 }
 syncToolbar();
 syncSheetMetrics();
-setTimeout(syncSheetMetrics, 600);   // 字体加载完再量一次更准
+setTimeout(syncSheetMetrics, 600);   // Measure again after fonts loaded to be more accurate
 
-/* ---------- 交互 ---------- */
+/* ---------- Interactions ---------- */
 $('btnPlay').addEventListener('click', togglePlayback);
 $('btnNext').addEventListener('click', next);
 $('btnPrev').addEventListener('click', prev);
@@ -1753,7 +1755,7 @@ $('bar').addEventListener('click', e => {
 });
 $('btnShuffle').addEventListener('click', () => {
   ++seq; recentOrder = !recentOrder;
-  toast(recentOrder ? '最近添加' : '常听与发现 · 每 10 首含 7 首常听与 3 首发现');
+  toast(recentOrder ? 'Recently Added' : 'Frequent & Discover · Every 10 songs contains 7 frequent and 3 discover');
   if (libLoaded) applyOrder(); else loadLibrary();
 });
 $('btnBedtime').addEventListener('click', () => {
@@ -1787,13 +1789,13 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') prev();
 });
 
-/* ---------- 可选语音：独立令牌，不代理音乐账号 ---------- */
+/* ---------- Optional Voice: Independent token, does not proxy music account ---------- */
 let voiceEpoch = 0, voiceTimer = null, voicePolling = false, voiceRecord = null;
 const voiceRequests = new Set();
 const voiceEnabled = (config = cfg) => !!(config.voiceOn && config.voiceUrl && config.voiceToken);
 function voiceBase(config = cfg) {
   const u = new URL((config.voiceUrl || '').trim());
-  if (!/^https?:$/.test(u.protocol) || u.username || u.password || u.search || u.hash) throw new Error('请填写 HTTP / HTTPS 语音服务地址');
+  if (!/^https?:$/.test(u.protocol) || u.username || u.password || u.search || u.hash) throw new Error('Please enter HTTP / HTTPS voice service address');
   return u.href.replace(/\/+$/, '');
 }
 async function voiceRequest(path, options = {}, config = cfg) {
@@ -1806,7 +1808,7 @@ async function voiceRequest(path, options = {}, config = cfg) {
       headers:Object.assign({}, options.headers, {Authorization:'Bearer ' + config.voiceToken}),
     }));
     const data = await response.json();
-    if (!response.ok) throw new Error((data && data.error) || '语音服务 HTTP ' + response.status);
+    if (!response.ok) throw new Error((data && data.error) || 'Voice service HTTP ' + response.status);
     return data;
   } finally { clearTimeout(timer); voiceRequests.delete(controller); }
 }
@@ -1816,12 +1818,12 @@ function validVoiceCommand(command) {
 }
 async function applyVoiceCommand(command, epoch) {
   if (epoch !== voiceEpoch || !configured() || !validVoiceCommand(command)) return;
-  if (command.type === 'search') { toast('语音点歌：' + command.query); await doSearch(command.query, true); return; }
+  if (command.type === 'search') { toast('Voice Request: ' + command.query); await doSearch(command.query, true); return; }
   const my = ++seq, gen = generation, chosen = playSeq;
   if (!bedtime.songs.length) await refreshBedtime();
   if (epoch !== voiceEpoch || my !== seq || gen !== generation || chosen !== playSeq) return;
   showBedtime();
-  if (list.length) play(0); else toast('暂无最爱，长按曲库歌曲加入');
+  if (list.length) play(0); else toast('No favorites yet, long press library songs to add');
 }
 function scheduleVoicePoll(delay = 2000) {
   clearTimeout(voiceTimer);
@@ -1856,13 +1858,13 @@ function resetVoice(restart = true) {
   }
   $('btnVoice').disabled = false; $('btnVoice').classList.remove('recording');
   $('btnVoice').setAttribute('aria-pressed', 'false');
-  $('btnVoice').title = voiceEnabled() ? '语音点歌 · 点击录音，再次点击结束' : '语音点歌 · 在设置中启用可选服务';
+  $('btnVoice').title = voiceEnabled() ? 'Voice Request · Click to record, click again to end' : 'Voice Request · Enable optional service in settings';
   if (restart) scheduleVoicePoll(0);
 }
 async function startVoice() {
   if (!voiceEnabled()) {
     openSettings(); $('voiceSettings').scrollIntoView({block:'center'});
-    toast('先配置可选语音服务；普通播放不需要它', 4500); return;
+    toast('Configure optional voice service first; normal playback does not require it', 4500); return;
   }
   if (!configured()) { openSettings(); return; }
   if (voiceRecord) {
@@ -1870,7 +1872,7 @@ async function startVoice() {
     return;
   }
   if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-    toast('此浏览器无法录音；请用 HTTPS，或用 iOS 快捷指令点歌', 6000); return;
+    toast('This browser cannot record audio; please use HTTPS or iOS Shortcuts to request songs', 6000); return;
   }
   const record = voiceRecord = {epoch:voiceEpoch, gen:generation, config:Object.assign({}, cfg), chunks:[], cancelled:false};
   const button = $('btnVoice');
@@ -1893,33 +1895,33 @@ async function startVoice() {
     const mime = ['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus'].find(type => MediaRecorder.isTypeSupported(type));
     const recorder = record.recorder = new MediaRecorder(record.stream, mime ? {mimeType:mime} : {});
     recorder.ondataavailable = event => { if (event.data.size) record.chunks.push(event.data); };
-    recorder.onerror = () => { record.cancelled = true; finish(); toast('录音失败，请重试或使用快捷指令'); };
+    recorder.onerror = () => { record.cancelled = true; finish(); toast('Recording failed, please try again or use Shortcuts'); };
     recorder.onstop = async () => {
       release();
       if (record.cancelled || voiceRecord !== record || record.epoch !== voiceEpoch) return;
       button.disabled = true; button.classList.remove('recording'); button.setAttribute('aria-pressed', 'false');
-      toast('正在识别…', 45000);
+      toast('Recognizing...', 45000);
       try {
         const blob = new Blob(record.chunks, {type:recorder.mimeType || 'audio/webm'});
-        if (!blob.size) throw new Error('没有录到声音');
+        if (!blob.size) throw new Error('No sound recorded');
         const data = await voiceRequest('/asr', {method:'POST', headers:{'Content-Type':blob.type}, body:blob}, record.config);
-        if (!validVoiceCommand(data.command)) throw new Error('语音服务返回的点歌格式不正确');
+        if (!validVoiceCommand(data.command)) throw new Error('Voice service returned incorrect request format');
         if (record.epoch === voiceEpoch && record.gen === generation && record.chosen === playSeq && record.search === seq)
           await applyVoiceCommand(data.command, record.epoch);
-      } catch (error) { if (!record.cancelled && record.epoch === voiceEpoch) toast('语音失败：' + error.message, 6000); }
+      } catch (error) { if (!record.cancelled && record.epoch === voiceEpoch) toast('Voice failed: ' + error.message, 6000); }
       finally { finish(); }
     };
     P.pause(); record.chosen = playSeq; record.search = seq;
     recorder.start(); button.disabled = false; button.classList.add('recording'); button.setAttribute('aria-pressed', 'true');
-    toast('请说歌名，点击麦克风结束（最多 8 秒）', 8000);
+    toast('Say the song name, click mic to end (max 8s)', 8000);
     record.timer = setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 8000);
-  } catch (error) { finish(); if (record.epoch === voiceEpoch) toast('无法录音：' + error.message, 6000); }
+  } catch (error) { finish(); if (record.epoch === voiceEpoch) toast('Cannot record: ' + error.message, 6000); }
 }
 $('btnVoice').addEventListener('click', startVoice);
 document.addEventListener('visibilitychange', () => resetVoice(!document.hidden));
 window.addEventListener('pagehide', () => resetVoice(false));
 
-/* ---------- 设置 ---------- */
+/* ---------- Settings ---------- */
 const FIELDS = { url:'cfgUrl', user:'cfgUser', pass:'cfgPass', yt:'cfgYt',
                  aiOn:'cfgAiOn', aiUrl:'cfgAiUrl', aiKey:'cfgAiKey', aiModel:'cfgAiModel', ext:'cfgExt', favoriteName:'cfgBedName',
                  voiceOn:'cfgVoiceOn', voiceUrl:'cfgVoiceUrl', voiceToken:'cfgVoiceToken' };
@@ -1942,8 +1944,8 @@ function readForm() {
   }
   return out;
 }
-// 官方公开演示服务器（navidrome.org/demo 上写明可用于测试 Subsonic 客户端）。
-// 填进去顺手测一次，省得用户还要自己点"测试连接"。
+// Official public demo server (navidrome.org/demo states it can be used for Subsonic client testing).
+// Fill it in and test it right away, saving user the click on "Test Connection".
 $('btnDemo').addEventListener('click', () => {
   $('cfgUrl').value = 'https://demo.navidrome.org';
   $('cfgUser').value = 'demo';
@@ -1957,29 +1959,29 @@ $('mask').addEventListener('click', e => {
 });
 $('btnTest').addEventListener('click', async () => {
   const out = $('testout'), config = Object.assign({}, cfg, readForm());
-  out.className = ''; out.textContent = '连接中…';
+  out.className = ''; out.textContent = 'Connecting...';
   try {
     const b = await subGet('ping', '', config);
     out.className = 'ok';
-    out.textContent = '连上了 · ' + (b.type || 'subsonic') + ' ' + (b.serverVersion || '');
+    out.textContent = 'Connected · ' + (b.type || 'subsonic') + ' ' + (b.serverVersion || '');
   } catch (e) {
     out.className = 'err';
-    out.textContent = '失败：' + e.message;
+    out.textContent = 'Failed: ' + e.message;
   }
 });
 $('btnVoiceTest').addEventListener('click', async () => {
   const out = $('voiceTestOut'), config = Object.assign({}, cfg, readForm());
-  if (!config.voiceUrl || !config.voiceToken) { out.textContent = '请填写服务地址与设备令牌'; return; }
-  out.textContent = '连接中…';
+  if (!config.voiceUrl || !config.voiceToken) { out.textContent = 'Please enter service address and device token'; return; }
+  out.textContent = 'Connecting...';
   try {
     const data = await voiceRequest('/health', {}, config);
-    out.textContent = data.asr ? '已连接 · 快捷指令与服务端转写已配置' : '已连接 · 快捷指令可用；服务端尚未配置转写';
-  } catch (error) { out.textContent = '失败：' + error.message; }
+    out.textContent = data.asr ? 'Connected · Shortcuts and server-side transcription configured' : 'Connected · Shortcuts available; server transcription not configured yet';
+  } catch (error) { out.textContent = 'Failed: ' + error.message; }
 });
 $('btnSave').addEventListener('click', () => {
   const form = readForm();
   if (form.voiceOn) {
-    try { if (!form.voiceToken) throw new Error('请填写语音设备令牌'); voiceBase(form); }
+    try { if (!form.voiceToken) throw new Error('Please fill in voice device token'); voiceBase(form); }
     catch (error) { toast(error.message); return; }
   }
   resetVoice(false);
@@ -1990,18 +1992,18 @@ $('btnSave').addEventListener('click', () => {
   discoveryPriorities.clear(); recentOrder = false; view = 'library';
   Object.assign(cfg, form);
   saveCfg();
-  setupBedtime(); setList([], '曲库');
-  showLyricPlaceholder('选一首歌开始');
+  setupBedtime(); setList([], 'Library');
+  showLyricPlaceholder('Select a song to start');
   $('mask').classList.remove('open');
   if (configured()) { loadLibrary(true); refreshBedtime(); }
-  else toast('至少要填 Navidrome 地址、用户名和密码');
+  else toast('Must fill in at least Navidrome address, username, and password');
   resetVoice();
 });
 
-/* ---------- 启动 ---------- */
+/* ---------- Boot ---------- */
 setupBedtime();
 if (configured()) { loadLibrary(); refreshBedtime(); }
-else { openSettings(); showLyricPlaceholder('先在右上角设置里填上你的 Navidrome'); }
+else { openSettings(); showLyricPlaceholder('Fill in your Navidrome in the top right settings first'); }
 resetVoice();
 
 })();
